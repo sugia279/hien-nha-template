@@ -1,0 +1,48 @@
+---
+import { sitePath, assetPath } from '@hien-nha/core-config';
+import type { PublicPost } from '@hien-nha/core-domain';
+import Frame from '../../components/Frame.astro';
+import { data } from '../../data.mjs';
+export function getStaticPaths() {
+  return data.posts.map((post: PublicPost) => ({
+    params: { id: post.id },
+    props: { post },
+  }));
+}
+interface Props {
+  post: PublicPost;
+}
+const { post } = Astro.props,
+  { site, hosting } = data,
+  p = site.presentation,
+  vi = p.locale === 'vi';
+---
+
+<Frame
+  site={site}
+  hosting={hosting}
+  title={post.title}
+  path={'posts/' + post.id + '/'}
+  description={post.body.slice(0, 180)}
+>
+  <div class="article-heading">
+    <a class="back" href={sitePath(hosting)}>
+      {vi ? '← Về hiên nhà' : '← Back home'}
+    </a>
+    <p class="author">{p.profile.name}</p>
+    <h1>{post.title}</h1>
+  </div>
+  <article class="article-body" aria-label={post.title}>
+    <p>{post.body}</p>
+    {post.media.map((media) => (
+      <figure class="media">
+        <img
+          src={assetPath(hosting, media.path)}
+          alt={media.alt}
+          loading="lazy"
+        />
+        <figcaption>{media.alt}</figcaption>
+      </figure>
+    ))}
+  </article>
+</Frame>

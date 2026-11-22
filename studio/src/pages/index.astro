@@ -1,0 +1,895 @@
+---
+import { presets } from '../presets';
+import ContentEditor from '../components/ContentEditor.astro';
+---
+
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="hien-nha-session" content="HIEN_NHA_SESSION_NONCE" />
+    <title>Bàn viết · Hiên Nhà</title>
+  </head>
+  <body>
+    <a class="skip" href="#editor">
+      Đến phần chỉnh sửa
+    </a>
+    <header class="topbar">
+      <a class="wordmark" href="/">
+        hiên nhà<span>BÀN VIẾT RIÊNG CỦA BẠN</span>
+      </a>
+      <div class="save-tools">
+        <label class="ui-language">
+          Ngôn ngữ Bàn viết
+          <select id="studio-language">
+            <option value="vi">Tiếng Việt</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+        <span id="save-state" role="status">
+          Đang mở…
+        </span>
+        <button id="undo" aria-label="Hoàn tác" disabled>
+          ↶ <span>Hoàn tác</span>
+        </button>
+        <button id="redo" aria-label="Làm lại" disabled>
+          ↷ <span>Làm lại</span>
+        </button>
+        <button id="reload" type="button">
+          Tải bản đã lưu
+        </button>
+        <button id="save" class="primary" disabled>
+          Lưu giao diện
+        </button>
+      </div>
+    </header>
+    <nav class="mobile-jump" aria-label="Bàn viết">
+      <a href="#editor">Chỉnh sửa</a>
+      <a href="#content-editor">Những trang viết</a>
+      <a href="#git-editor">Đưa thay đổi vào Git</a>
+      <a href="#preview-heading">Xem trước ↓</a>
+    </nav>
+    <div id="message" role="alert" aria-live="polite"></div>
+    <div class="workspace">
+      <main id="editor" class="editor" tabindex="-1">
+        <div class="intro">
+          <p class="eyebrow">MỘT GÓC NHỎ CỦA RIÊNG BẠN</p>
+          <h1>Dọn một hiên nhà.</h1>
+          <p>
+            Chọn màu, đặt tên, thêm một chút mình. Mọi thay đổi ở đây thuộc
+            repository của bạn.
+          </p>
+        </div>
+        <form id="design" autocomplete="off">
+          <section aria-labelledby="preset-heading">
+            <div class="section-title">
+              <span>01</span>
+              <h2 id="preset-heading">Bắt đầu từ một cảm hứng</h2>
+            </div>
+            <div class="presets">
+              {presets.map((p) => (
+                <button type="button" class="preset" data-preset={p.id}>
+                  <span class="swatches">
+                    {p.colors.map((color) => (
+                      <i style={`background:${color}`}></i>
+                    ))}
+                  </span>
+                  <strong>{p.name}</strong>
+                  <small>{p.description}</small>
+                </button>
+              ))}
+            </div>
+            <p class="help">
+              Đổi mẫu giữ nguyên tên, ảnh, menu và bài viết của bạn.
+            </p>
+          </section>
+          <section aria-labelledby="identity-heading">
+            <div class="section-title">
+              <span>02</span>
+              <h2 id="identity-heading">Lời chào ở cửa</h2>
+            </div>
+            <label>
+              Tên website
+              <input name="name" maxlength="600" required />
+            </label>
+            <label>
+              Một lời giới thiệu
+              <input name="tagline" maxlength="600" required />
+            </label>
+            <div class="pair">
+              <label>
+                Tên người viết
+                <input name="profileName" maxlength="600" required />
+              </label>
+              <label>
+                Chữ viết tắt
+                <input name="initials" maxlength="4" required />
+              </label>
+            </div>
+            <label>
+              Về bạn
+              <textarea name="bio" maxlength="600" rows="3" required></textarea>
+            </label>
+            <label>
+              Ngôn ngữ website
+              <select name="locale">
+                <option value="vi">Tiếng Việt</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+          </section>
+          <section aria-labelledby="look-heading">
+            <div class="section-title">
+              <span>03</span>
+              <h2 id="look-heading">Màu và nhịp điệu</h2>
+            </div>
+            <div class="colors">
+              {[
+                ['background', 'Nền'],
+                ['foreground', 'Chữ'],
+                ['accent', 'Điểm nhấn'],
+                ['surface', 'Bề mặt'],
+              ].map(([name, label]) => (
+                <label>
+                  {label}
+                  <input type="color" name={name} />
+                </label>
+              ))}
+            </div>
+            <p id="contrast-note" class="help" role="status"></p>
+            <div class="pair">
+              <label>
+                Kiểu chữ
+                <select name="font">
+                  <option value="serif">Serif · ấm áp</option>
+                  <option value="sans">Sans · gọn gàng</option>
+                </select>
+              </label>
+              <label>
+                Danh sách bài
+                <select name="layout">
+                  <option value="journal">Trang nhật ký</option>
+                  <option value="cards">Những tấm thẻ</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              Bố cục banner
+              <select name="banner">
+                <option value="plain">Lời chào bên trái</option>
+                <option value="centered">Lời chào ở giữa</option>
+                <option value="split">Hai khoảng không gian</option>
+              </select>
+            </label>
+            <div class="image-editor">
+              <h3>Ảnh đại diện</h3>
+              <label>
+                Chọn ảnh đại diện
+                <input
+                  type="file"
+                  id="avatar-file"
+                  accept="image/png,image/jpeg,image/webp,image/avif"
+                />
+              </label>
+              <label>
+                Mô tả ảnh đại diện
+                <input name="avatarAlt" maxlength="600" />
+              </label>
+              <button type="button" id="remove-avatar">
+                Bỏ ảnh đại diện
+              </button>
+              <span id="avatar-state" class="help"></span>
+            </div>
+            <div class="image-editor">
+              <h3>Ảnh banner</h3>
+              <label>
+                Chọn ảnh banner
+                <input
+                  type="file"
+                  id="banner-file"
+                  accept="image/png,image/jpeg,image/webp,image/avif"
+                />
+              </label>
+              <label>
+                Mô tả ảnh banner
+                <input name="bannerAlt" maxlength="600" />
+              </label>
+              <button type="button" id="remove-banner">
+                Bỏ ảnh banner
+              </button>
+              <span id="banner-state" class="help"></span>
+            </div>
+            <p class="help">
+              PNG, JPEG, WebP hoặc AVIF, tối đa 5 MiB. Ảnh upload được xoay đúng
+              chiều, thu gọn và chuyển WebP, bỏ metadata đầu vào. Nội dung trong
+              ảnh vẫn do bạn kiểm tra.
+            </p>
+          </section>
+          <section aria-labelledby="menu-heading">
+            <div class="section-title">
+              <span>04</span>
+              <h2 id="menu-heading">Những lối đi</h2>
+            </div>
+            <label class="check">
+              <input type="checkbox" checked disabled />
+              Trang chủ luôn bật
+            </label>
+            <label class="check">
+              <input name="profileEnabled" type="checkbox" />
+              Trang về tôi
+            </label>
+            <label class="check">
+              <input name="postsEnabled" type="checkbox" />
+              Danh sách bài viết
+            </label>
+            <p class="help">
+              Tắt module chỉ ẩn khỏi website; không xóa nội dung.
+            </p>
+            <div class="pair">
+              <label>
+                Nhãn trang chủ
+                <input name="homeLabel" maxlength="600" required />
+              </label>
+              <label>
+                Nhãn trang về tôi
+                <input name="profileLabel" maxlength="600" />
+              </label>
+            </div>
+            <button type="button" id="menu-order">
+              Đảo thứ tự menu
+            </button>
+            <p id="menu-summary" class="help"></p>
+          </section>
+        </form>
+        <section aria-labelledby="hosting-heading">
+          <div class="section-title">
+            <span>05</span>
+            <h2 id="hosting-heading">Địa chỉ của hiên nhà</h2>
+          </div>
+          <p>
+            Địa chỉ lưu riêng với giao diện. Bước này chưa bật xuất bản hay thay
+            đổi GitHub Pages.
+          </p>
+          <form id="hosting">
+            <label>
+              Tài khoản GitHub
+              <input name="owner" placeholder="your-account" required />
+            </label>
+            <label>
+              Repository của bạn
+              <input name="repo" placeholder="my-home" required />
+            </label>
+            <output id="hosting-url"></output>
+            <button type="submit" id="save-hosting">
+              Lưu địa chỉ
+            </button>
+          </form>
+        </section>
+        <ContentEditor />
+        <footer>
+          <strong id="core-version">Core</strong>
+          <p>
+            Core được ghim bằng tarball cục bộ; chưa có kênh nhận nâng cấp Core
+            tự động. Kiểm tra thay đổi bằng PR và CI.
+          </p>
+          <p>
+            Codespaces là tùy chọn và dùng quota tài khoản GitHub. Kiểm tra
+            quota, giữ cổng Private và dừng Codespace khi xong.
+          </p>
+          <p>
+            Bàn viết ở workspace riêng. Giữ cổng này Private. Lưu file chưa phải
+            commit, push hay deploy.
+          </p>
+          <p>
+            Static Only: bài ONLY_ME và bản nháp vẫn có thể được đọc trong repo
+            Git công khai và lịch sử Git.
+          </p>
+        </footer>
+      </main>
+      <aside class="preview-panel" aria-labelledby="preview-heading">
+        <div class="preview-toolbar">
+          <div>
+            <p class="eyebrow">BẠN ĐANG NHÌN QUA KHUNG CỬA</p>
+            <h2 id="preview-heading" tabindex="-1">
+              Xem trước
+            </h2>
+          </div>
+          <button id="preview" class="primary">
+            Tạo bản xem trước
+          </button>
+        </div>
+        <div class="preview-options">
+          <label>
+            Kích thước
+            <select id="viewport">
+              <option value="100%">Vừa khung</option>
+              <option value="390px">Điện thoại · 390</option>
+              <option value="768px">Máy tính bảng · 768</option>
+              <option value="1280px">Máy tính · 1280</option>
+            </select>
+          </label>
+          <span id="preview-state" role="status">
+            Bản xem trước không thay đổi file đã lưu.
+          </span>
+        </div>
+        <div class="preview-canvas">
+          <div id="preview-empty">
+            <span>⌂</span>
+            <h3>Hiên nhà đang chờ bạn.</h3>
+            <p>
+              Chỉnh một vài chi tiết rồi tạo bản xem trước.
+              <br />
+              Đây là bản build Astro thật, chỉ nằm trong workspace riêng.
+            </p>
+          </div>
+          <iframe
+            id="site-preview"
+            title="Bản xem trước website"
+            sandbox="allow-same-origin"
+            hidden
+          ></iframe>
+        </div>
+      </aside>
+    </div>
+    <script>
+      import '../client';
+    </script>
+  </body>
+</html>
+<style is:global>
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    font-family: system-ui, sans-serif;
+    color: #263a32;
+    background: #f7f7f2;
+    overflow-wrap: anywhere;
+  }
+  body {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+  button {
+    border: 1px solid #cdd6cd;
+    background: #fff;
+    color: #284e3d;
+    border-radius: 8px;
+    padding: 9px 14px;
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) {
+    background: #edf3ec;
+    border-color: #6a8d73;
+  }
+  button:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+  .primary {
+    background: #315d46;
+    color: #fff;
+    border-color: #315d46;
+  }
+  .content-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .ui-language {
+    font-size: 11px;
+    margin: 0;
+  }
+  .ui-language select {
+    padding: 4px;
+    margin: 0;
+    font-size: 12px;
+  }
+  section,
+  #editor,
+  #preview-heading {
+    scroll-margin-top: 140px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+  .disclosure {
+    padding: 14px;
+    border-left: 3px solid #856130;
+    background: #faf0dc;
+    color: #61451f;
+  }
+  #post-media img {
+    max-width: 100%;
+    max-height: 160px;
+    object-fit: contain;
+  }
+  #post-media > div {
+    padding: 12px;
+    border: 1px solid #cdd6cd;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  .primary:hover:not(:disabled) {
+    background: #244b37;
+    color: #fff;
+  }
+  a {
+    color: inherit;
+  }
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  a:focus-visible {
+    outline: 3px solid #b46c2e;
+    outline-offset: 3px;
+  }
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid #dbe1d7;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 17px 30px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .wordmark {
+    font:
+      bold 25px Georgia,
+      serif;
+    text-decoration: none;
+    letter-spacing: -1px;
+    line-height: 1.2;
+  }
+  .wordmark span {
+    display: block;
+    font:
+      9px system-ui,
+      sans-serif;
+    letter-spacing: 1.9px;
+    margin-top: 6px;
+    color: #506252;
+  }
+  .save-tools {
+    flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  #save-state {
+    font-size: 12px;
+    color: #506252;
+    margin-right: 8px;
+  }
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(340px, 480px) minmax(0, 1fr);
+    max-width: 1920px;
+    margin: auto;
+  }
+  .editor {
+    padding: 38px 32px 50px;
+    background: #fff;
+    border-right: 1px solid #dbe1d7;
+    min-width: 0;
+  }
+  .intro h1 {
+    font:
+      36px Georgia,
+      serif;
+    letter-spacing: -1px;
+    margin: 12px 0;
+  }
+  .intro p:not(.eyebrow) {
+    color: #506252;
+    max-width: 360px;
+  }
+  .eyebrow {
+    font:
+      9px system-ui,
+      sans-serif;
+    letter-spacing: 1.5px;
+    color: #506252;
+    margin: 0;
+  }
+  section {
+    padding: 30px 0;
+    border-bottom: 1px solid #e5e9e0;
+  }
+  .section-title {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .section-title > span {
+    font:
+      11px Georgia,
+      serif;
+    color: #506252;
+    background: #f3f5ee;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+  }
+  h2 {
+    font-size: 16px;
+    margin: 0;
+  }
+  h3 {
+    font-size: 13px;
+    margin: 0 0 12px;
+  }
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0 0 16px;
+  }
+  input:not([type='checkbox']):not([type='color']),
+  textarea,
+  select {
+    width: 100%;
+    min-width: 0;
+    padding: 10px 11px;
+    border: 1px solid #778574;
+    border-radius: 7px;
+    color: #2f4137;
+    background: #fbfcf8;
+  }
+  textarea {
+    resize: vertical;
+  }
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  .help {
+    font-size: 11px;
+    color: #506252;
+    font-weight: 400;
+  }
+  .presets {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .preset {
+    text-align: left;
+    padding: 13px 14px;
+    display: grid;
+    grid-template-columns: 82px 1fr;
+    column-gap: 14px;
+    align-items: center;
+  }
+  .preset strong {
+    font-size: 13px;
+  }
+  .preset small {
+    font-size: 10px;
+    color: #506252;
+    grid-column: 2;
+  }
+  .preset[aria-pressed='true'] {
+    border-color: #3f6d4c;
+    box-shadow: 0 0 0 1px #3f6d4c;
+    background: #f3f7ef;
+  }
+  .swatches {
+    display: flex;
+    grid-row: span 2;
+  }
+  .swatches i {
+    display: block;
+    width: 22px;
+    height: 34px;
+    border: 1px solid #263a321a;
+    margin-right: -3px;
+    border-radius: 7px;
+  }
+  .colors {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .colors input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #778574;
+    border-radius: 7px;
+    background: #fff;
+    padding: 4px;
+  }
+  .image-editor {
+    background: #f8faf5;
+    border: 1px solid #e1e7dc;
+    border-radius: 9px;
+    padding: 16px;
+    margin: 16px 0;
+  }
+  .image-editor .help {
+    display: block;
+    margin-top: 8px;
+  }
+  .check {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    font-weight: 400;
+  }
+  .check input {
+    width: 16px;
+    height: 16px;
+    accent-color: #315d46;
+  }
+  #hosting-url {
+    display: block;
+    margin: 8px 0 16px;
+    color: #58705b;
+    font-size: 12px;
+  }
+  footer {
+    font-size: 11px;
+    color: #506252;
+    padding-top: 30px;
+  }
+  footer strong {
+    color: #4c6551;
+  }
+  .preview-panel {
+    min-width: 0;
+    position: sticky;
+    top: 88px;
+    align-self: start;
+    height: calc(100vh - 88px);
+    display: flex;
+    flex-direction: column;
+  }
+  .preview-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 28px 26px 18px;
+  }
+  .preview-toolbar h2 {
+    font:
+      24px Georgia,
+      serif;
+    margin-top: 7px;
+  }
+  .preview-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 0 26px 18px;
+  }
+  .preview-options label {
+    margin: 0;
+    max-width: 220px;
+    font-weight: 400;
+  }
+  .preview-options select {
+    padding: 7px 10px;
+    background: #fff;
+  }
+  .preview-options > span {
+    font-size: 11px;
+    max-width: 220px;
+    color: #506252;
+  }
+  .preview-canvas {
+    padding: 18px 26px 30px;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    background: radial-gradient(#ced8c980 1px, transparent 1px) 0 0/14px 14px;
+  }
+  #site-preview {
+    display: block;
+    max-width: none;
+    width: 100%;
+    height: 100%;
+    min-height: 560px;
+    border: 1px solid #dbe2d5;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 12px 40px #2e4a2910;
+  }
+  #site-preview[hidden] {
+    display: none;
+  }
+  #preview-empty {
+    text-align: center;
+    border: 1px dashed #cad5c3;
+    display: grid;
+    align-content: center;
+    background: #f7f9f3d9;
+    min-height: 500px;
+    border-radius: 10px;
+    padding: 30px;
+    color: #506252;
+  }
+  #preview-empty[hidden] {
+    display: none;
+  }
+  #preview-empty > span {
+    font:
+      72px Georgia,
+      serif;
+    color: #92a785;
+  }
+  #preview-empty h3 {
+    font:
+      25px Georgia,
+      serif;
+    color: #526c4b;
+    margin: 15px 0;
+  }
+  #preview-empty p {
+    font-size: 12px;
+  }
+  #message:not(:empty) {
+    padding: 12px 30px;
+    background: #f6e9cf;
+    border-bottom: 1px solid #e8d5af;
+    color: #6e4c22;
+    font-size: 12px;
+  }
+  .mobile-jump {
+    display: none;
+  }
+  #editor,
+  #preview-heading {
+    scroll-margin-top: 190px;
+  }
+  .skip {
+    position: absolute;
+    top: -100px;
+    left: 20px;
+    padding: 12px;
+    background: #fff;
+    z-index: 5;
+  }
+  .skip:focus {
+    top: 8px;
+  }
+  @media (min-width: 1500px) {
+    .presets {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 900px) {
+    .mobile-jump {
+      display: flex;
+      justify-content: space-around;
+      padding: 12px;
+      background: #edf3e7;
+      border-bottom: 1px solid #dbe1d7;
+    }
+    .workspace {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .editor {
+      border-right: 0;
+      padding: 30px 24px;
+    }
+    .preview-panel {
+      position: relative;
+      top: auto;
+      height: 850px;
+      border-top: 1px solid #dbe1d7;
+    }
+    .intro p:not(.eyebrow) {
+      max-width: 600px;
+    }
+    .presets {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .preset {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .save-tools button span {
+      display: none;
+    }
+    .topbar {
+      padding: 15px 22px;
+    }
+    .wordmark {
+      font-size: 22px;
+    }
+    #save-state {
+      max-width: 100px;
+    }
+    .preview-toolbar,
+    .preview-options {
+      padding-left: 22px;
+      padding-right: 22px;
+    }
+    .preview-canvas {
+      padding: 16px 22px;
+    }
+  }
+  @media (max-width: 520px) {
+    .topbar {
+      gap: 10px;
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .save-tools {
+      flex-wrap: wrap;
+      width: 100%;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    #save-state {
+      max-width: none;
+      margin-right: auto;
+    }
+    .wordmark span {
+      font-size: 8px;
+    }
+    .editor {
+      padding: 26px 20px;
+    }
+    .pair {
+      gap: 10px;
+    }
+    .presets {
+      grid-template-columns: 1fr;
+    }
+    .preset {
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      gap: 0 12px;
+    }
+    .preview-toolbar {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 13px;
+    }
+    .preview-options {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .preview-panel {
+      height: 900px;
+    }
+    .preview-canvas {
+      padding: 14px;
+    }
+    #message:not(:empty) {
+      padding: 12px 20px;
+    }
+  }
+</style>

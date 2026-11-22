@@ -1,0 +1,301 @@
+---
+import {
+  sitePath,
+  canonicalUrl,
+  type SiteConfig,
+  type HostingConfig,
+} from '@hien-nha/core-config';
+import SiteNavigation from '@hien-nha/core-ui/SiteNavigation.astro';
+interface Props {
+  site: SiteConfig;
+  hosting: HostingConfig;
+  title?: string;
+  path?: string;
+  active?: 'home' | 'profile';
+  description?: string;
+}
+const {
+  site,
+  hosting,
+  title,
+  path = '',
+  active = 'home',
+  description,
+} = Astro.props;
+const p = site.presentation,
+  t = p.theme;
+const variables = `--bg:${t.palette.background};--fg:${t.palette.foreground};--accent:${t.palette.accent};--surface:${t.palette.surface};--font:${t.font === 'serif' ? 'Georgia, serif' : 'system-ui, sans-serif'}`;
+const vi = p.locale === 'vi';
+---
+
+<!doctype html>
+<html lang={p.locale} style={variables}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title?title+' · '+p.name:p.name}</title>
+    <meta name="description" content={description || p.tagline} />
+    <link rel="canonical" href={canonicalUrl(hosting, path)} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={p.name}
+      href={hosting.base + 'rss.xml'}
+    />
+    <link
+      rel="sitemap"
+      type="application/xml"
+      href={hosting.base + 'sitemap.xml'}
+    />
+  </head>
+  <body data-layout={t.layout}>
+    <a class="skip" href="#main">
+      {vi ? 'Đến nội dung' : 'Skip to content'}
+    </a>
+    <div class="shell">
+      <header class="site-header">
+        <a class="brand" href={sitePath(hosting)}>
+          {p.name}
+          <span>HIÊN NHÀ</span>
+        </a>
+        <SiteNavigation
+          menu={p.menu}
+          modules={p.modules}
+          hosting={hosting}
+          active={active}
+          label={vi ? 'Điều hướng chính' : 'Main navigation'}
+        />
+      </header>
+      <main id="main" tabindex="-1">
+        <slot />
+      </main>
+      <footer>
+        {vi
+          ? 'Một hiên nhà, những câu chuyện của riêng bạn.'
+          : 'A little home for your stories.'}
+        <span>Hiên Nhà</span>
+        <a href={hosting.base + 'rss.xml'}>RSS</a>
+        <a href={hosting.base + 'sitemap.xml'}>Sitemap</a>
+      </footer>
+    </div>
+  </body>
+</html>
+<style is:global>
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    font-family: var(--font);
+    color: var(--fg);
+    background: var(--bg);
+    overflow-wrap: anywhere;
+  }
+  body {
+    margin: 0;
+    line-height: 1.7;
+  }
+  a {
+    color: var(--accent);
+    text-underline-offset: 0.2em;
+  }
+  a:focus-visible,
+  button:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 5px;
+  }
+  .shell {
+    max-width: 1120px;
+    margin: auto;
+    padding: 0 32px;
+  }
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 38px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--fg) 15%, transparent);
+  }
+  .brand {
+    color: var(--fg);
+    font-size: 1.15rem;
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .brand span {
+    display: block;
+    font-family: system-ui, sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    margin-top: 3px;
+  }
+  main {
+    min-height: 65vh;
+    padding: 44px 0 64px;
+  }
+  h1,
+  h2,
+  h3,
+  p {
+    margin-top: 0;
+  }
+  h1 {
+    font-size: clamp(2.1rem, 5vw, 3.8rem);
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+  }
+  h2 {
+    font-size: 1.8rem;
+    line-height: 1.3;
+  }
+  h3 {
+    font-size: 1.45rem;
+    line-height: 1.35;
+  }
+  .post-list {
+    margin-top: 64px;
+  }
+  .section-label {
+    font:
+      600 0.7rem system-ui,
+      sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+  .posts {
+    display: grid;
+    gap: 26px;
+  }
+  .post-card {
+    border-top: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+    padding: 28px 0;
+  }
+  .post-card h3 a {
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .post-card h3 a:hover {
+    text-decoration: underline;
+  }
+  .excerpt {
+    opacity: 0.8;
+    white-space: pre-wrap;
+  }
+  .read-more {
+    font:
+      600 0.8rem system-ui,
+      sans-serif;
+  }
+  .empty {
+    padding: 44px 0;
+    opacity: 0.75;
+  }
+  .article-body {
+    max-width: 740px;
+    margin: 28px auto 0;
+  }
+  .article-body > p {
+    white-space: pre-wrap;
+    font-size: 1.12rem;
+    line-height: 1.9;
+  }
+  .article-heading {
+    max-width: 860px;
+    margin: 20px auto 0;
+  }
+  .back {
+    display: inline-block;
+    font:
+      600 0.8rem system-ui,
+      sans-serif;
+    margin-bottom: 36px;
+  }
+  .author {
+    font:
+      0.85rem system-ui,
+      sans-serif;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .media {
+    margin: 28px 0;
+  }
+  .media img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+  }
+  .media figcaption {
+    font:
+      0.8rem system-ui,
+      sans-serif;
+    opacity: 0.75;
+    margin-top: 8px;
+  }
+  footer {
+    border-top: 1px solid color-mix(in srgb, var(--fg) 15%, transparent);
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 30px 0 38px;
+    font:
+      0.72rem system-ui,
+      sans-serif;
+    opacity: 0.75;
+  }
+  footer span {
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .skip {
+    position: absolute;
+    left: 16px;
+    top: -100px;
+    background: var(--surface);
+    padding: 10px 18px;
+    z-index: 5;
+  }
+  .skip:focus {
+    top: 10px;
+  }
+  [data-layout='cards'] .posts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  [data-layout='cards'] .post-card {
+    border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 28px;
+  }
+  @media (max-width: 640px) {
+    .shell {
+      padding: 0 22px;
+    }
+    .site-header {
+      align-items: flex-start;
+      flex-direction: column;
+      padding: 24px 0;
+      gap: 18px;
+    }
+    main {
+      padding-top: 30px;
+    }
+    .post-list {
+      margin-top: 40px;
+    }
+    [data-layout='cards'] .posts {
+      grid-template-columns: 1fr;
+    }
+    .post-card {
+      padding: 24px 0;
+    }
+    footer {
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+</style>

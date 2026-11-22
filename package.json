@@ -1,0 +1,33 @@
+{
+  "name": "hien-nha-personal-site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "packageManager": "npm@11.20.0",
+  "engines": {
+    "node": "26.13.0",
+    "npm": "11.20.0"
+  },
+  "scripts": {
+    "dev": "node tools/verify-core.mjs && node tools/astro.mjs dev",
+    "build": "node tools/verify-core.mjs && node tools/astro.mjs build",
+    "check": "node tools/astro.mjs check",
+    "verify": "node tools/verify-core.mjs && npm run check && npm run build && node tools/verify-output.mjs",
+    "preflight": "node tools/pages-preflight.mjs",
+    "studio:build": "node tools/astro.mjs build --config studio/astro.config.mjs",
+    "studio": "node tools/verify-core.mjs && npm run studio:build && node tools/studio.mjs"
+  },
+  "dependencies": {
+    "@hien-nha/core-domain": "file:vendor/hien-nha-core-domain-0.1.1.tgz",
+    "@hien-nha/core-config": "file:vendor/hien-nha-core-config-0.1.1.tgz",
+    "@hien-nha/core-client": "file:vendor/hien-nha-core-client-0.1.1.tgz",
+    "@hien-nha/core-ui": "file:vendor/hien-nha-core-ui-0.1.1.tgz"
+  },
+  "devDependencies": {
+    "astro": "7.4.13",
+    "@astrojs/check": "0.9.12",
+    "typescript": "5.9.3",
+    "sharp": "0.35.5"
+  }
+}

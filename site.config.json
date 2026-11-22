@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 3,
+  "id": "my-home",
+  "presentation": {
+    "name": "Hiên Nhà của bạn",
+    "tagline": "Một góc nhỏ để viết và lưu giữ.",
+    "locale": "vi",
+    "profile": {
+      "name": "Người viết",
+      "bio": "Chào mừng bạn đến hiên nhà.",
+      "initials": "HN",
+      "avatar": null
+    },
+    "theme": {
+      "schemaVersion": 1,
+      "palette": {
+        "background": "#faf7f0",
+        "foreground": "#29251f",
+        "accent": "#765433",
+        "surface": "#ffffff"
+      },
+      "font": "serif",
+      "layout": "journal"
+    },
+    "modules": ["home", "profile", "posts"],
+    "banner": { "schemaVersion": 1, "layout": "plain", "image": null },
+    "menu": {
+      "schemaVersion": 1,
+      "items": [
+        { "module": "home", "label": "Trang chủ" },
+        { "module": "profile", "label": "Về tôi" }
+      ]
+    }
+  }
+}

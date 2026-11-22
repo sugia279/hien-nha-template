@@ -1,0 +1,161 @@
+<section aria-labelledby="content-heading" id="content-editor" tabindex="-1">
+  <div class="section-title">
+    <span>06</span>
+    <h2 id="content-heading">Những trang viết</h2>
+  </div>
+  <p>
+    Viết chữ thuần, thêm tối đa 4 ảnh. Lưu ở workspace chưa phải commit, push
+    hay deploy.
+  </p>
+  <p id="content-state" role="status">
+    Đang mở bài viết…
+  </p>
+  <label>
+    Bài viết<select id="post-list" aria-label="Bài viết"></select>
+  </label>
+  <div class="content-actions">
+    <button type="button" id="new-post">
+      Viết bài mới
+    </button>
+    <button type="button" id="delete-post">
+      Xóa bài đang chọn
+    </button>
+  </div>
+  <form id="post-form" autocomplete="off" hidden>
+    <label>
+      Tiêu đề bài
+      <input id="post-title" maxlength="200" required />
+    </label>
+    <label>
+      Nội dung bài
+      <textarea id="post-body" rows="9" maxlength="100000" required></textarea>
+    </label>
+    <label>
+      Ai thấy bài trên website?
+      <select id="post-visibility" required>
+        <option value="">Chọn rõ cách hiển thị</option>
+        <option value="PUBLIC">PUBLIC · Công khai</option>
+        <option value="ONLY_ME">ONLY_ME · Ẩn khỏi website</option>
+      </select>
+    </label>
+    <label class="check">
+      <input type="checkbox" id="post-published" />
+      Sẵn sàng hiển thị sau deploy (bỏ chọn để lưu nháp)
+    </label>
+    <p class="help">
+      ONLY_ME luôn bị loại khỏi website Static Only. Bản nháp cũng bị loại, kể
+      cả khi chọn PUBLIC.
+    </p>
+    <div id="post-media"></div>
+    <label>
+      Thêm ảnh cho bài
+      <input
+        id="post-image"
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/avif"
+      />
+    </label>
+    <p class="help">
+      Tối đa 5 MiB/ảnh. Ảnh được giải mã và chuyển WebP; thêm mô tả ảnh trước
+      khi lưu.
+    </p>
+    <button id="preview-post" type="button">
+      Xem riêng bài đang chỉnh
+    </button>
+  </form>
+  <p class="disclosure">
+    Static Only: ONLY_ME, bản nháp và ảnh source vẫn có thể được đọc trong
+    repository GitHub công khai và lịch sử Git. Đây chỉ là ẩn khỏi website,
+    không phải giữ bí mật dữ liệu.
+  </p>
+  <label class="check">
+    <input id="content-disclosure" type="checkbox" />
+    Tôi hiểu cảnh báo source/lịch sử Git khi lưu ONLY_ME hoặc nháp
+  </label>
+  <button type="button" class="primary" id="save-content">
+    Lưu các bài vào workspace
+  </button>
+  <h3>Nhập và xuất nội dung</h3>
+  <p class="help">
+    Xuất JSON đã lưu, gồm tham chiếu ảnh; không gồm byte ảnh và không phải
+    backup đầy đủ. File xuất có thể chứa ONLY_ME/nháp — giữ file riêng.
+  </p>
+  <button type="button" id="export-content">
+    Xuất JSON đã lưu
+  </button>
+  <label>
+    File JSON để nhập
+    <input id="import-file" type="file" accept="application/json,.json" />
+  </label>
+  <label>
+    Định dạng nhập
+    <select id="import-format">
+      <option value="current">ContentDocument v1 hiện tại</option>
+      <option value="legacy">Di chuyển rõ ràng mảng 5 trường cũ</option>
+    </select>
+  </label>
+  <button type="button" id="import-content">
+    Kiểm tra và nạp vào bản chỉnh sửa
+  </button>
+  <p class="help">
+    Nhập thay thế danh sách trong bản chỉnh sửa sau xác nhận; bạn vẫn phải bấm
+    Lưu. Không tự chuyển phiên bản file đang lưu.
+  </p>
+</section>
+<section aria-labelledby="git-heading" id="git-editor" tabindex="-1">
+  <div class="section-title">
+    <span>07</span>
+    <h2 id="git-heading">Đưa thay đổi vào Git</h2>
+  </div>
+  <p>
+    Chỉ dùng credentials của workspace. Không nhập token vào browser. Thao tác
+    yêu cầu đúng repo, branch main và origin/main; file ngoài allowlist cần được
+    xử lý thủ công.
+  </p>
+  <form id="publication-form">
+    <label class="check">
+      <input id="publication-enabled" type="checkbox" />
+      Cho phép workflow Pages deploy sau push lên main
+    </label>
+    <p class="help">
+      Không thay đổi Settings → Pages. Origin/base phải khớp repo; mặc định tắt.
+      Bạn cần tự thiết lập GitHub Pages bằng GitHub Actions.
+    </p>
+    <button type="submit">Lưu lựa chọn xuất bản</button>
+  </form>
+  <button type="button" id="git-refresh">
+    Kiểm tra trạng thái Git
+  </button>
+  <p id="git-state" role="status">
+    Chưa kiểm tra Git.
+  </p>
+  <ul id="git-files"></ul>
+  <form id="git-form">
+    <label>
+      Lời nhắn commit
+      <input
+        id="commit-message"
+        maxlength="200"
+        value="Update my home"
+        required
+      />
+    </label>
+    <label class="check">
+      <input id="git-disclosure" type="checkbox" />
+      Tôi chấp nhận đưa các file source vào lịch sử Git; ONLY_ME/nháp không bí
+      mật trong repo public
+    </label>
+    <div class="content-actions">
+      <button type="button" id="git-commit">
+        Tạo commit từ file đã lưu
+      </button>
+      <button type="button" id="git-push">
+        Push commit lên origin/main
+      </button>
+    </div>
+  </form>
+  <p id="git-result" role="status"></p>
+  <a id="actions-link" hidden target="_blank" rel="noreferrer">
+    Mở GitHub Actions để xem kết quả thật
+  </a>
+</section>

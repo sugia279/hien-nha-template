@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    ignore:
+      - dependency-name: '@hien-nha/*' # Local private tarballs have no registry update channel.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3

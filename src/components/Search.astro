@@ -1,0 +1,146 @@
+---
+import { data } from '../data.mjs';
+const { hosting, site } = data;
+const vi = site.presentation.locale === 'vi';
+---
+
+<section
+  aria-labelledby="search-heading"
+  class="search"
+  data-index={hosting.base + 'search.json'}
+  data-base={hosting.base}
+  data-locale={site.presentation.locale}
+  data-site-id={site.id}
+>
+  <h2 id="search-heading">{vi ? 'Tìm một câu chuyện' : 'Find a story'}</h2>
+  <form role="search">
+    <label for="story-query">
+      {vi ? 'Tìm trong bài công khai' : 'Search public stories'}
+    </label>
+    <div>
+      <input id="story-query" type="search" maxlength="200" />
+      <button type="submit">{vi ? 'Tìm' : 'Search'}</button>
+    </div>
+  </form>
+  <p class="search-status" role="status" aria-live="polite">
+    {vi
+      ? 'Chỉ tìm trong bài PUBLIC đã xuất bản.'
+      : 'Only published PUBLIC stories are indexed.'}
+  </p>
+  <ul class="search-results"></ul>
+</section>
+<script>
+  import { parsePublicSnapshot, type PublicPost } from '@hien-nha/core-domain';
+  for (const root of document.querySelectorAll<HTMLElement>('.search')) {
+    const form = root.querySelector('form')!,
+      input = root.querySelector('input')!,
+      status = root.querySelector<HTMLElement>('.search-status')!,
+      list = root.querySelector('.search-results')!;
+    const vi = root.dataset.locale === 'vi';
+    let posts: PublicPost[] | undefined,
+      busy = false;
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (busy) return;
+      busy = true;
+      root.setAttribute('aria-busy', 'true');
+      status.textContent = vi ? 'Đang tìm…' : 'Searching…';
+      list.replaceChildren();
+      try {
+        if (!posts) {
+          const response = await fetch(root.dataset.index!, {
+            credentials: 'omit',
+          });
+          if (!response.ok) throw Error('Index unavailable');
+          const text = await response.text();
+          if (new TextEncoder().encode(text).length > 2_000_000)
+            throw Error('Index exceeds limit');
+          const snapshot = parsePublicSnapshot(JSON.parse(text));
+          if (snapshot.siteId !== root.dataset.siteId)
+            throw Error('Wrong site');
+          posts = snapshot.posts;
+        }
+        const query = input.value
+          .trim()
+          .normalize('NFC')
+          .toLocaleLowerCase(root.dataset.locale);
+        if (!query) {
+          status.textContent = vi
+            ? 'Nhập một từ để tìm.'
+            : 'Enter a word to search.';
+          return;
+        }
+        const found = posts
+          .filter((p) =>
+            (p.title + ' ' + p.body)
+              .normalize('NFC')
+              .toLocaleLowerCase(root.dataset.locale)
+              .includes(query),
+          )
+          .slice(0, 50);
+        for (const p of found) {
+          const li = document.createElement('li'),
+            a = document.createElement('a');
+          a.href = root.dataset.base + 'posts/' + p.id + '/';
+          a.textContent = p.title;
+          li.append(a);
+          list.append(li);
+        }
+        status.textContent = found.length
+          ? (vi
+              ? 'Kết quả công khai (tối đa 50): '
+              : 'Public results (up to 50): ') + found.length
+          : vi
+            ? 'Không có câu chuyện phù hợp.'
+            : 'No matching stories.';
+      } catch {
+        posts = undefined;
+        status.textContent = vi
+          ? 'Chưa thể tìm. Bạn có thể thử lại; nội dung trang vẫn ở đây.'
+          : 'Search is unavailable. Try again; the page content is still here.';
+      } finally {
+        busy = false;
+        root.removeAttribute('aria-busy');
+      }
+    });
+  }
+</script>
+<style>
+  .search {
+    border-block-start: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+    padding-top: 24px;
+    margin-top: 36px;
+  }
+  h2 {
+    font-size: 1.25rem;
+  }
+  label {
+    display: block;
+  }
+  form div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  input,
+  button {
+    font: inherit;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 8px 12px;
+    background: var(--surface);
+    color: var(--fg);
+  }
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+  button {
+    cursor: pointer;
+  }
+  input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+  }
+</style>

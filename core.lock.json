@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1.1",
+  "sourceCommit": "1dfbc525517627e9992c4a67c2fa7235403e108d",
+  "sourceTree": "21aecb4264e4c45f9d2f89e28df234d39de95029",
+  "distribution": "private local tarballs; no registry publication",
+  "packages": [
+    {
+      "id": "core-domain",
+      "file": "hien-nha-core-domain-0.1.1.tgz",
+      "integrity": "sha512-Ft3KedlOWSPxrt3eGzKeMuY/dXqdv96xFoUSAk29V/P93TDjJxF78WIOjc5NOV6Gp9rxB/MZO0veGotwlYay7g=="
+    },
+    {
+      "id": "core-config",
+      "file": "hien-nha-core-config-0.1.1.tgz",
+      "integrity": "sha512-Wy1n2jlAmMG5jXP9WHm+hhGvCPR7Azkxmv+QsnYYeW80hS7RL2sWRU1WA0j/0EXbZm0qCsVjPUerJ4q6651mbA=="
+    },
+    {
+      "id": "core-client",
+      "file": "hien-nha-core-client-0.1.1.tgz",
+      "integrity": "sha512-RnemOHBKVAyXZVEVfhdJ6giq10Kl/uT48fWoF3K3xigL0krCMrN7zki9DCiUoxIrkuX1M7ZPZJbk2e+U1g44yA=="
+    },
+    {
+      "id": "core-ui",
+      "file": "hien-nha-core-ui-0.1.1.tgz",
+      "integrity": "sha512-dOl6WTM2bEe7IcQQkIdJYZz2L0ZYu3YUz7dPUPC9N1IEcUtfrMEA/j6FJ+cGslOcau/KXvM9/uBofLnO8BpmIA=="
+    }
+  ]
+}

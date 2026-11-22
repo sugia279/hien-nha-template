@@ -1,0 +1,3 @@
+FROM node:26.13.0-bookworm@sha256:a546d3f8acd2af4382668a7e6acd3bc4418e6a27478373e3246f8162f5181509
+RUN npm install --global npm@11.20.0 && node --version && npm --version && git --version
+USER node

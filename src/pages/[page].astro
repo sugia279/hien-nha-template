@@ -1,0 +1,31 @@
+---
+import Banner from '@hien-nha/core-ui/Banner.astro';
+import ProfileIdentity from '@hien-nha/core-ui/ProfileIdentity.astro';
+import Frame from '../components/Frame.astro';
+import { data } from '../data.mjs';
+export function getStaticPaths() {
+  return data.site.presentation.modules.includes('profile')
+    ? [{ params: { page: 'profile' } }]
+    : [];
+}
+const { site, hosting } = data,
+  p = site.presentation;
+---
+
+<Frame
+  site={site}
+  hosting={hosting}
+  title={p.locale === 'vi' ? 'Về tôi' : 'About me'}
+  path="profile/"
+  active="profile"
+>
+  <Banner
+    headingId="profile-heading"
+    banner={p.banner}
+    hosting={hosting}
+    title={p.profile.name}
+    tagline={p.tagline}
+  >
+    <ProfileIdentity profile={p.profile} hosting={hosting} showName={false} />
+  </Banner>
+</Frame>

@@ -1,0 +1,16 @@
+{
+  "name": "Hiên Nhà — private writing desk",
+  "build": { "dockerfile": "Dockerfile" },
+  "remoteUser": "node",
+  "postCreateCommand": ["npm", "ci"],
+  "postStartCommand": ["node", "tools/start-studio.mjs"],
+  "waitFor": "postCreateCommand",
+  "forwardPorts": [4447],
+  "portsAttributes": {
+    "4447": {
+      "label": "Bàn viết — keep Private",
+      "onAutoForward": "openBrowserOnce"
+    }
+  },
+  "otherPortsAttributes": { "onAutoForward": "ignore" }
+}
