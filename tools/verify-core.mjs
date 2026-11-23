@@ -127,6 +127,6 @@ if (
   console.log(
     'Core ' +
       result.version +
-      ' vendor/install/contracts verified; no automatic release channel or upgrade.',
+      ' vendor/install/contracts verified; release checks require opt-in and review; no automatic upgrade.',
   );
 }

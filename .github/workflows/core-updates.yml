@@ -1,0 +1,72 @@
+name: Review a Core release
+on:
+  workflow_dispatch:
+    inputs:
+      check_now:
+        description: Check once and propose a compatible Core PR (never auto-merge)
+        type: boolean
+        default: false
+  schedule:
+    - cron: '17 4 * * 1'
+permissions:
+  contents: read
+concurrency:
+  group: core-update-${{ github.repository }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      changed: ${{ steps.prepare.outputs.changed }}
+      fingerprint: ${{ steps.prepare.outputs.fingerprint }}
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      HIEN_NHA_BASE_SHA: ${{ github.sha }}
+      HIEN_NHA_UPDATE_ONCE: ${{ inputs.check_now == true && 'true' || 'false' }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+      - run: npm install --global npm@11.20.0
+      - id: prepare
+        run: node tools/core-update.mjs --prepare
+      - if: steps.prepare.outputs.changed == 'true'
+        run: npm ci
+      - if: steps.prepare.outputs.changed == 'true'
+        run: npm run verify
+      - if: steps.prepare.outputs.changed == 'true'
+        run: npm audit --audit-level=low
+      - if: steps.prepare.outputs.changed == 'true'
+        run: node tools/core-update.mjs --attest
+        env:
+          EXPECTED_FINGERPRINT: ${{ steps.prepare.outputs.fingerprint }}
+  propose:
+    needs: verify
+    if: github.ref == 'refs/heads/main' && needs.verify.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      HIEN_NHA_BASE_SHA: ${{ github.sha }}
+      EXPECTED_FINGERPRINT: ${{ needs.verify.outputs.fingerprint }}
+    steps:
+      # Only trusted default-branch, built-in-only tooling runs in this job.
+      # Candidate Core is parsed but never installed/imported/executed here.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+      - run: node tools/core-update-pr.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
