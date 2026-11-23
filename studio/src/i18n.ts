@@ -1,6 +1,6 @@
 export const english: Record<string, string> = {
-  'Core được ghim bằng tarball cục bộ; chưa có kênh nhận nâng cấp Core tự động. Kiểm tra thay đổi bằng PR và CI.':
-    'Core is pinned with local tarballs; automatic Core release updates are unavailable. Review changes through PRs and CI.',
+  'Core được ghim bằng tarball; chỉ kiểm tra release khi chủ nhà bật. Cần review PR và CI, không tự nâng cấp.':
+    'Core is pinned with tarballs; release checks require the owner to opt in. Review the PR and CI; upgrades are never automatic.',
   'Codespaces là tùy chọn và dùng quota tài khoản GitHub. Kiểm tra quota, giữ cổng Private và dừng Codespace khi xong.':
     'Codespaces is optional and uses your GitHub account quota. Check quota, keep the port Private and stop the Codespace when finished.',
   'Màu đang chọn có cặp chữ/nền dưới 4.5:1. Cân nhắc tăng tương phản hoặc chọn lại một mẫu.':
